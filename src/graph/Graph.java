@@ -15,22 +15,34 @@ import java.util.*;
 public class Graph {
     
     /**
+     * Code to mark unvisited nodes (just added)
+     */
+    private static Integer UNEXPLORED = -2;
+    
+    /**
+     * Code to mark node that has already been visited, but has not been 
+     * assigned any finishing time.
+     */
+    private static Integer EXPLORED = -1;
+    
+    /**
      * A map from node number to list of node numbers corresponding to nodes 
-     * from which it is possibile to arrive to the given node.
+     * from which it is possible to arrive to the given node.
      */
     private HashMap<Integer, Set<Integer>> _edgesIn;
     
     /**
      * A map from node number to list of node numbers corresponding to nodes
-     * to which it is possibile to arrive from the given node.
+     * to which it is possible to arrive from the given node.
      */
     private HashMap<Integer, Set<Integer>> _edgesOut;
 
     
     /**
-     * A map from node number to finishing time. For nodes that have already been 
-     * visited but finishing time has not been calculated so far, then 
-     * it is temporarily assigned to be equal to -1. 
+     * A map from node number to finishing time. By default, for newly added 
+     * node, the finishing time is set to Graph::UNEXPLORED. Nodes that have 
+     * been explored but finishing time has not been assigned yet, are 
+     * marked Graph::EXPLORED. 
      */
     private HashMap<Integer, Integer> _time;
     
@@ -38,6 +50,35 @@ public class Graph {
      * A map from node number to leader node number.
      */
     private HashMap<Integer, Integer> _leader;
+    
+    /**
+     * Maximal node number. Updated automatically every time edge or node 
+     * is inserted
+     */
+    private Integer _maxNodeNumber = null;
+    
+    
+    /**
+     * The number of nodes in the graph
+     */
+    private int _size = 0;
+    
+    
+    /**
+     * _size getter.
+     * @return int
+     */
+    public int getSize(){
+        return this._size;
+    }
+    
+    /**
+     * Max node number getter
+     * @return Integer
+     */
+    public Integer maxNodeNum(){
+        return this._maxNodeNumber;
+    }
     
     /**
      * Graph constructor. 
@@ -61,10 +102,7 @@ public class Graph {
      */
     private boolean _registerEdge(HashMap<Integer, Set<Integer>> src, Integer i, Integer j){
         if (src.containsKey(i)){
-            if(src.get(i).contains(j)){
-                return false;
-            };
-            src.get(i).add(j);
+             return src.get(i).add(j);
         } else {
             Set<Integer> list = new HashSet();
             list.add(j);
@@ -81,6 +119,23 @@ public class Graph {
     public void addEdge(Integer tail, Integer head){
         this._registerEdge(this._edgesOut, tail, head);
         this._registerEdge(this._edgesIn, head, tail);
+        this.addNode(tail);
+        this.addNode(head);
+    }
+    
+    /**
+     * Adds _time contains no key n, then mapping  n => UNEXPLORED is added into _times and
+     * _maxNodeNumber and _size are updated.
+     * @param n node number
+     */
+    public void addNode(Integer n){
+        if (!this._time.containsKey(n)){
+            this._time.put(n, UNEXPLORED);
+            if (this._maxNodeNumber == null || this._maxNodeNumber < n) {
+                this._maxNodeNumber = n;
+            }
+            this._size++;
+        }
     }
     
     /**
@@ -97,6 +152,14 @@ public class Graph {
         return this._edgesOut.get(tail).contains(head);
     }
             
+    /**
+     * Returns set of out-nodes of the given one.
+     * @param n
+     * @return Set<Integer>
+     */
+    public Set<Integer> outNodesOf(Integer n){
+        return this._edgesOut.get(n);
+    }
     
     /**
      * @param args the command line arguments

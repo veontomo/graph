@@ -5,6 +5,7 @@
  */
 
 package graph;
+import java.util.*;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -47,7 +48,7 @@ public class GraphTest {
         Graph g = new Graph();
         g.addEdge(5, 7);
         boolean result = g.edgeExists(5, 7);
-        assertEquals(true, result);
+        assertTrue(result);
     }
 
     /**
@@ -71,7 +72,7 @@ public class GraphTest {
         Graph g = new Graph();
         g.addEdge(3, 2);
         boolean result = g.edgeExists(2, 3);
-        assertEquals(false, result);
+        assertFalse(result);
     }
 
     /**
@@ -83,7 +84,7 @@ public class GraphTest {
         Graph g = new Graph();
         g.addEdge(10, 10);
         boolean result = g.edgeExists(10, 10);
-        assertEquals(true, result);
+        assertTrue(result);
     }
 
     /**
@@ -95,7 +96,7 @@ public class GraphTest {
         Graph g = new Graph();
         g.addEdge(3, 3);
         boolean result = g.edgeExists(1, 1);
-        assertEquals(false, result);
+        assertFalse(result);
     }
 
     
@@ -106,9 +107,118 @@ public class GraphTest {
     public void testEdgeExistsOfEmptyGraph() {
         System.out.println("Test whether an edgge exists in empty graph");
         Graph g = new Graph();
-//        boolean result = g.edgeExists(1, 3);
-//        assertEquals(false, result);
+        boolean result = g.edgeExists(1, 3);
+        assertFalse(result);
     }
+    
+    @Test
+    public void testEmptyGraphLength() {
+        System.out.println("Returns zero for empty graph");
+        Graph g = new Graph();
+        assertEquals(0, g.getSize());
+    }
+    
+    @Test
+    public void testOneElementGraphLength() {
+        System.out.println("Returns 1 for single node graph");
+        Graph g = new Graph();
+        g.addNode(5);
+        assertEquals(1, g.getSize());
+    }
+    
+    @Test
+    public void testLengthOfSelfLoopGraph() {
+        System.out.println("Returns 1 for single node graph with self-loop");
+        Graph g = new Graph();
+        g.addEdge(1,1);
+        assertEquals(1, g.getSize());
+    }
+
+
+    @Test
+    public void testLengthOfGraphWIth5Nodes() {
+        System.out.println("Returns 5 for graph with 5 nodes added node by node");
+        Graph g = new Graph();
+        g.addNode(1);
+        g.addNode(2);
+        g.addNode(5);
+        g.addNode(6);
+        g.addNode(9);
+        assertEquals(5, g.getSize());
+    }
+
+    @Test
+    public void testLengthOfGraphWith2NodesWithRepetitions() {
+        System.out.println("Returns 2 for graph with 2 nodes when they are added multiply");
+        Graph g = new Graph();
+        g.addNode(1);
+        g.addNode(2);
+        g.addNode(2);
+        g.addNode(2);
+        g.addNode(1);
+        assertEquals(2, g.getSize());
+    }
+
+    @Test
+    public void testLengthOfGraphWith6Nodes() {
+        System.out.println("Returns 6 for graph with 6 nodes added by means of edges");
+        Graph g = new Graph();
+        g.addEdge(1, 7);
+        g.addEdge(5, 7);
+        g.addEdge(2, 5);
+        g.addEdge(4, 3);
+        assertEquals(6, g.getSize());
+    }
+    
+    @Test
+    public void testMaxNodeNumEmptyGraph() {
+        System.out.println("Returns null for empty graph");
+        Graph g = new Graph();
+        assertNull(g.maxNodeNum());
+    }
+
+    @Test
+    public void testMaxNodeNumSingleNode() {
+        System.out.println("Returns the only node number");
+        Graph g = new Graph();
+        g.addNode(23);
+        assertTrue(g.maxNodeNum() == 23);
+    }
+
+    @Test
+    public void testMaxNodeNum3NodeGraph() {
+        System.out.println("Returns maximum node number if the nodes are added node by node");
+        Graph g = new Graph();
+        g.addNode(3);
+        g.addNode(5);
+        g.addNode(4);
+        assertTrue(g.maxNodeNum() == 5);
+    }
+
+    @Test
+    public void testMaxNodeNum4NodeGraph() {
+        System.out.println("Returns maximum node number if the nodes are added by edges");
+        Graph g = new Graph();
+        g.addEdge(3, 19);
+        g.addEdge(5, 21);
+        g.addEdge(4, 6);
+        assertTrue(g.maxNodeNum() == 21);
+    }
+    
+    @Test
+    public void testGetOutNodes() {
+        System.out.println("Returns set of out-nodes");
+        Graph g = new Graph();
+        g.addEdge(9, 2);
+        g.addEdge(9, 4);
+        g.addEdge(1, 9);
+        g.addEdge(3, 9);
+        Set<Integer> list = g.outNodesOf(9);
+        assertEquals(2, list.size());
+        assertTrue(list.contains(2));
+        assertTrue(list.contains(4));
+    }
+    
     
     /**
      * Test of main method, of class Graph.
@@ -120,20 +230,6 @@ public class GraphTest {
 //        Graph.main(args);
 //        // TODO review the generated test code and remove the default call to fail.
 //        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of addEdge method, of class Graph.
-     */
-    @Test
-    public void testAddEdge() {
-        System.out.println("addEdge");
-        Integer tail = null;
-        Integer head = null;
-        Graph instance = new Graph();
-        instance.addEdge(tail, head);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
     }
     
 }
