@@ -6,10 +6,12 @@
 
 package graph;
 
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import org.junit.Before;
 
 /**
  *
@@ -26,6 +28,14 @@ public class GraphTest {
     
     @AfterClass
     public static void tearDownClass() {
+    }
+
+    @Before
+    public void setUp() throws Exception {
+    }
+
+    @After
+    public void tearDown() throws Exception {
     }
 
     /**
@@ -110,6 +120,20 @@ public class GraphTest {
 //        Graph.main(args);
 //        // TODO review the generated test code and remove the default call to fail.
 //        fail("The test case is a prototype.");
+    }
+
+    /**
+     * Test of addEdge method, of class Graph.
+     */
+    @Test
+    public void testAddEdge() {
+        System.out.println("addEdge");
+        Integer tail = null;
+        Integer head = null;
+        Graph instance = new Graph();
+        instance.addEdge(tail, head);
+        // TODO review the generated test code and remove the default call to fail.
+        fail("The test case is a prototype.");
     }
     
 }
