@@ -204,6 +204,18 @@ public class GraphTest {
         g.addEdge(4, 6);
         assertTrue(g.maxNodeNum() == 21);
     }
+
+    @Test
+    public void testGetOutNodesEmpty() {
+        System.out.println("Returns empty set if there are no out-nodes");
+        Graph g = new Graph();
+        g.addEdge(9, 2);
+        g.addEdge(9, 4);
+        g.addEdge(1, 9);
+        Set<Integer> list = g.outNodesOf(2);
+        assertEquals(0, list.size());
+    }
+
     
     @Test
     public void testGetOutNodes() {
@@ -219,6 +231,92 @@ public class GraphTest {
         assertTrue(list.contains(4));
     }
     
+    @Test
+    public void testGetInNodesEmpty() {
+        System.out.println("Returns empty set if there are no in-nodes");
+        Graph g = new Graph();
+        g.addEdge(9, 2);
+        g.addEdge(1, 9);
+        Set<Integer> list = g.inNodesOf(1);
+        assertEquals(0, list.size());
+    }
+    
+    @Test
+    public void testGetInNodes(){
+        System.out.println("Returns set of out-nodes");
+        Graph g = new Graph();
+        g.addEdge(9, 2);
+        g.addEdge(9, 4);
+        g.addEdge(1, 9);
+        Set<Integer> list = g.inNodesOf(9);
+        assertEquals(1, list.size());
+        assertTrue(list.contains(1));
+    }
+    
+    
+    @Test
+    public void testMarkNonExistentNode() {
+        System.out.println("Returns false if one tries to mark as explored a "
+                + "node that does not exist.");
+        Graph g = new Graph();
+        g.addNode(9);
+        g.addNode(4);
+        assertFalse(g.mark(1));
+    }
+
+    @Test
+    public void testMarkUnexplored() {
+        System.out.println("Returns true when marking an unexplored node ");
+        Graph g = new Graph();
+        g.addNode(9);
+        g.addNode(4);
+        assertTrue(g.mark(4));
+    }
+    
+    
+    @Test
+    public void testMarkExplored() {
+        System.out.println("Returns false if one tries to mark as explored a "
+                + "node that has already been explored.");
+        Graph g = new Graph();
+        g.addNode(4);
+        g.addNode(5);
+        g.mark(5);
+        assertFalse(g.mark(5));
+    }
+
+    
+    @Test
+    public void testIsExploredIfNotExists() {
+        System.out.println("Returns false if one tries to find out whether an "
+                + "non-existent node has been explored.");
+        Graph g = new Graph();
+        g.addNode(4);
+        g.addNode(5);
+        assertFalse(g.isExplored(6));
+    }
+    
+    @Test
+    public void testIsExploredIfNotExplored() {
+        System.out.println("Returns false if one tries to find out whether a"
+                + " non-explored node has been explored.");
+        Graph g = new Graph();
+        g.addNode(4);
+        g.addNode(5);
+        assertFalse(g.isExplored(5));
+    }
+
+    @Test
+    public void testIsExploredIfExplored() {
+        System.out.println("Returns true if one tries to find out whether an"
+                + " explored node has been explored.");
+        Graph g = new Graph();
+        g.addNode(3);
+        g.addNode(2);
+        g.mark(3);
+        assertTrue(g.isExplored(3));
+    }
+
     
     /**
      * Test of main method, of class Graph.
