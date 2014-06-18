@@ -317,6 +317,33 @@ public class GraphTest {
         assertTrue(g.isExplored(3));
     }
 
+    @Test
+    public void testTimeInitial() {
+        System.out.println("Returns zero as starting time.");
+        Graph g = new Graph();
+        assertEquals(0, g.getTime());
+    }
+
+    
+    @Test
+    public void testTimeAfterSingleTick() {
+        System.out.println("Returns 1 after first tick.");
+        Graph g = new Graph();
+        g.tick();
+        assertEquals(1, g.getTime());
+    }
+
+    
+    @Test
+    public void testTimeAfterThreeTicks() {
+        System.out.println("Returns 3 after three ticks.");
+        Graph g = new Graph();
+        g.tick();
+        g.tick();
+        g.tick();
+        assertEquals(3, g.getTime());
+    }
+
     
     /**
      * Test of main method, of class Graph.
