@@ -344,7 +344,101 @@ public class GraphTest {
         assertEquals(3, g.getTime());
     }
 
+
+    @Test
+    public void testNextUnExploredNodeIfNone() {
+        System.out.println("Returns null if there is no unexplored node.");
+        Graph g = new Graph();
+        g.addNode(3); 
+        g.mark(3);
+        g.addNode(2); 
+        g.mark(2);
+        g.addNode(6); 
+        g.mark(6);
+        g.addNode(7); 
+        g.mark(7);
+        g.addNode(8); 
+        g.mark(8);
+        assertNull(g.nextUnExplored(8));
+    }
+
+
+    @Test
+    public void testNextUnExploredReturnsItself() {
+        System.out.println("Returns the input node number if it is unexplored.");
+        Graph g = new Graph();
+        g.addNode(3);
+        g.addNode(2);
+        g.addNode(6);
+        g.addNode(7);
+        g.addNode(8);
+        g.mark(3);
+        g.mark(8);
+        System.out.println(g.nextUnExplored(7));
+    }
     
+    @Test
+    public void testNextUnExploredReturnsPreviuosNode(){
+        System.out.println("Returns the input node number if it is unexplored.");
+        Graph g = new Graph();
+        g.addNode(3);
+        g.addNode(2);
+        g.addNode(6);
+        g.addNode(7);
+        g.addNode(8);
+        g.mark(3);
+        g.mark(7);
+        assertTrue(6 == g.nextUnExplored(7));
+    }
+    
+    @Test
+    public void testNextUnExploredReturnsFirstNode() {
+        System.out.println("Returns the input node number if it is unexplored.");
+        Graph g = new Graph();
+        g.addNode(2);
+        g.addNode(3);
+        g.addNode(6);
+        g.addNode(7);
+        g.addNode(8);
+        g.mark(8);
+        g.mark(7);
+        g.mark(6);
+        g.mark(3);
+        assertTrue(2 == g.nextUnExplored(7));
+    }
+
+//    1 -->-- 2      5
+//    |     ^ |    / |
+//    |   /   |   Y  |
+//    Y  /    Y  /   Y
+//    | /     | /    |
+//    3 -->-- 4      6
+    @Test
+    public void testDfsLoopFromLast(){
+        System.out.println("Assigns times to two nodes.");
+        Graph g = new Graph();
+        g.addEdge(1, 2);
+        g.addEdge(1, 3);
+        g.addEdge(3, 2);
+        g.addEdge(3, 4);
+        g.addEdge(5, 4);
+        g.addEdge(5, 6);
+        g.dfsLoop(6);
+        assertTrue(g.isExplored(6));
+        assertTrue(g.isExplored(5));
+        assertFalse(g.isExplored(1));
+        assertFalse(g.isExplored(2));
+        assertFalse(g.isExplored(3));
+        assertFalse(g.isExplored(4));
+        assertTrue(g.isExplored(5));
+        assertTrue(g.isExplored(6));
+        assertTrue(2 == g.getFinTimeOf(6));
+        assertTrue(1 == g.getFinTimeOf(5));
+        assertFalse(g.isExplored(1));
+        assertFalse(g.isExplored(2));
+        assertFalse(g.isExplored(3));
+        assertFalse(g.isExplored(4));
+    }
     /**
      * Test of main method, of class Graph.
      */

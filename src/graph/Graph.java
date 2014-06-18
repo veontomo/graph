@@ -83,6 +83,18 @@ public class Graph {
     }
     
     /**
+     * Returns finishing time for node n.
+     * @param n  node number
+     * @return Integer
+     */
+    public Integer getFinTimeOf(Integer n){
+        if (!this._finTime.containsKey(n)){
+            throw new IllegalArgumentException("Node does not exist!");
+        }
+        return this._finTime.get(n);
+    }
+    
+    /**
      * Graph constructor. 
      */
     public Graph(){
@@ -214,6 +226,41 @@ public class Graph {
         this._time++;
     }
     
+    /**
+     * Gets number of the next unexplored node which number is not greater than
+     * start. If no such node exists, null is returned.
+     * @param startNode  node number from which to start the search
+     * @return Integer|Null
+     */
+    public Integer nextUnExplored(Integer startNode){
+        if (!this._finTime.containsKey(startNode)){
+            throw new IllegalArgumentException("Start node must exist!");
+        }
+        int status = this._finTime.get(startNode);
+        if (status == UNEXPLORED){
+            return startNode;
+        }
+        while (status != UNEXPLORED && startNode >= 0){
+            startNode--;
+            if (this._finTime.containsKey(startNode)){
+                status = this._finTime.get(startNode);
+                if (status == UNEXPLORED){
+                    return startNode;
+                }
+            }
+        }
+        return null;
+    }
+    
+    
+    
+    /**
+     * Performs deep-first-search from the given node n.
+     * @param n 
+     */
+    public void dfsLoop(Integer n){
+        
+    }
     /**
      * @param args the command line arguments
      */
