@@ -36,7 +36,6 @@ public class Graph {
      * to which it is possible to arrive from the given node.
      */
     private HashMap<Integer, Set<Integer>> _edgesOut;
-
     
     /**
      * A map from node number to finishing time. By default, for newly added 
@@ -44,7 +43,7 @@ public class Graph {
      * been explored but finishing time has not been assigned yet, are 
      * marked Graph::EXPLORED. 
      */
-    private HashMap<Integer, Integer> _time;
+    private HashMap<Integer, Integer> _finTime;
     
     /**
      * A map from node number to leader node number.
@@ -63,7 +62,10 @@ public class Graph {
      */
     private int _size = 0;
     
-    
+    /**
+     * Current time
+     */
+    private int _time = 0;
     /**
      * _size getter.
      * @return int
@@ -86,7 +88,7 @@ public class Graph {
     public Graph(){
         this._edgesIn = new HashMap();
         this._edgesOut = new HashMap();
-        this._time = new HashMap();
+        this._finTime = new HashMap();
         this._leader = new HashMap();
     }
 
@@ -124,13 +126,13 @@ public class Graph {
     }
     
     /**
-     * Adds _time contains no key n, then mapping  n => UNEXPLORED is added into _times and
+     * Adds _finTime contains no key n, then mapping  n => UNEXPLORED is added into _times and
      * _maxNodeNumber and _size are updated.
      * @param n node number
      */
     public void addNode(Integer n){
-        if (!this._time.containsKey(n)){
-            this._time.put(n, UNEXPLORED);
+        if (!this._finTime.containsKey(n)){
+            this._finTime.put(n, UNEXPLORED);
             if (this._maxNodeNumber == null || this._maxNodeNumber < n) {
                 this._maxNodeNumber = n;
             }
@@ -155,10 +157,61 @@ public class Graph {
     /**
      * Returns set of out-nodes of the given one.
      * @param n
-     * @return Set<Integer>
+     * @return Set
      */
     public Set<Integer> outNodesOf(Integer n){
-        return this._edgesOut.get(n);
+        Set<Integer> res = this._edgesOut.get(n);
+        return (res == null) ? (new HashSet()) : res;
+
+    }
+    
+        /**
+     * Returns set of out-nodes of the given one.
+     * @param n
+     * @return Set
+     */
+    public Set<Integer> inNodesOf(Integer n){
+        Set<Integer> res = this._edgesIn.get(n);
+        return (res == null) ? (new HashSet()) : res;
+    }
+    
+    /**
+     * Marks node number n as explored. Returns true if node exists and has not 
+     * been explored yet. Otherwise returns false.
+     * @param  n 
+     * @return boolean
+     */
+    public boolean mark(int n){
+        if (this._finTime.containsKey(n) && this._finTime.get(n) == UNEXPLORED){
+            this._finTime.put(n, EXPLORED);
+            return true;
+        }
+        return false;
+    }
+    
+    /** 
+     * Returns true if the node exists and has been marked as explored.
+     * @param n
+     * @return boolean
+     */
+    public boolean isExplored(int n){
+        return (this._finTime.containsKey(n) && this._finTime.get(n) == EXPLORED);
+    }
+    
+    /**
+     * _finTime getter
+     * @return int
+     */
+    public int getTime(){
+        return this._time;
+    }
+    
+    /**
+     * Increases time by one unit.
+     * @return void
+     */
+    public void tick(){
+        this._time++;
     }
     
     /**
