@@ -407,12 +407,13 @@ public class GraphTest {
         assertTrue(2 == g.nextUnExplored(7));
     }
 
-//    1 -->-- 2      5
-//    |     ^ |    / |
-//    |   /   |   Y  |
-//    Y  /    Y  /   Y
-//    | /     | /    |
-//    3 -->-- 4      6
+//    1 -->-- 2       5
+//    |     / |     / |
+//    |    ↗  |   ↙   |
+//    ∨  /    ∨  /    ↓
+//    | /     | /     |
+//    3 -->-- 4       6
+    // → ← ∟ ↔ ▲ ↓ ↑ ↨▬§ ∧ ∨↖↗↘↙
     @Test
     public void testDfsLoopFromLast(){
         System.out.println("Assigns times to two nodes.");
@@ -424,8 +425,6 @@ public class GraphTest {
         g.addEdge(5, 4);
         g.addEdge(5, 6);
         g.dfsLoop(6);
-        assertTrue(g.isExplored(6));
-        assertTrue(g.isExplored(5));
         assertFalse(g.isExplored(1));
         assertFalse(g.isExplored(2));
         assertFalse(g.isExplored(3));
@@ -434,10 +433,26 @@ public class GraphTest {
         assertTrue(g.isExplored(6));
         assertTrue(2 == g.getFinTimeOf(6));
         assertTrue(1 == g.getFinTimeOf(5));
+    }
+    
+    @Test
+    public void testDfsLoopFromNoWayNode() {
+        System.out.println("Assigns times to two nodes.");
+        Graph g = new Graph();
+        g.addEdge(1, 2);
+        g.addEdge(1, 3);
+        g.addEdge(3, 2);
+        g.addEdge(3, 4);
+        g.addEdge(5, 4);
+        g.addEdge(5, 6);
+        g.dfsLoop(5);
         assertFalse(g.isExplored(1));
         assertFalse(g.isExplored(2));
         assertFalse(g.isExplored(3));
         assertFalse(g.isExplored(4));
+        assertTrue(g.isExplored(5));
+        assertFalse(g.isExplored(6));
+        assertTrue(1 == g.getFinTimeOf(5));
     }
     /**
      * Test of main method, of class Graph.

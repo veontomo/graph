@@ -252,14 +252,28 @@ public class Graph {
         return null;
     }
     
-    
+    public void assignTimeToNode(Integer n){
+        /// !!! stub
+    }
     
     /**
      * Performs deep-first-search from the given node n.
      * @param n 
      */
     public void dfsLoop(Integer n){
-        
+        if (!this._finTime.containsKey(n)){
+            throw new IllegalArgumentException("Node " + n + " does not exist! "
+                    + "Can not use it to perform dfsLoop.");
+        }
+        this.mark(n);
+        Set<Integer> inNodes = this.inNodesOf(n);
+        for(Integer inNode : inNodes){
+            if (!this.isExplored(inNode)){
+                this.dfsLoop(inNode);
+            }
+        }
+        this.tick();
+        this.assignTimeToNode(n);
     }
     /**
      * @param args the command line arguments
