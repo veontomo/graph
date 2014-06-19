@@ -207,7 +207,7 @@ public class Graph {
      * @return boolean
      */
     public boolean isExplored(int n){
-        return (this._finTime.containsKey(n) && this._finTime.get(n) == EXPLORED);
+        return (this._finTime.containsKey(n) && this._finTime.get(n) != UNEXPLORED);
     }
     
     /**
@@ -252,8 +252,17 @@ public class Graph {
         return null;
     }
     
+    
+    /**
+     * Assigns current time to node n.
+     * @param n  node number to which assign current time.
+     */
     public void assignTimeToNode(Integer n){
-        /// !!! stub
+        if (!this._finTime.containsKey(n)){
+            throw new IllegalArgumentException("Node " + n + " does not exist"
+                    + " and hence can not be assigned finishing time.");
+        }
+        this._finTime.put(n, this.getTime());
     }
     
     /**
@@ -265,15 +274,21 @@ public class Graph {
             throw new IllegalArgumentException("Node " + n + " does not exist! "
                     + "Can not use it to perform dfsLoop.");
         }
+//        System.out.println("Start from node " + n);
+//        System.out.println("Its fintime: " + this._finTime.get(n));
         this.mark(n);
+//        System.out.println("Node " + n + " marked as explored. Its fintime: " + this._finTime.get(n));
         Set<Integer> inNodes = this.inNodesOf(n);
         for(Integer inNode : inNodes){
+//            System.out.println("Consider node " + inNode);
             if (!this.isExplored(inNode)){
                 this.dfsLoop(inNode);
             }
         }
         this.tick();
+//        System.out.println("assigned finishing time " + this.getTime() + " to node " + n);
         this.assignTimeToNode(n);
+//        System.out.println("Finishing time of node " + n + " is " + this.getFinTimeOf(n));
     }
     /**
      * @param args the command line arguments
