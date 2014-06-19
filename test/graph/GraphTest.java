@@ -424,7 +424,7 @@ public class GraphTest {
 //    ∨  /    ∨  /    ↓
 //    | /     | /     |
 //    3 -->-- 4       6
-    // → ← ∟ ↔ ▲ ↓ ↑ ↨▬§ ∧ ∨↖↗↘↙
+// → ← ∟ ↔ ▲ ↓ ↑ ↨▬§ ∧ ∨↖↗↘↙
     @Test
     public void testDfsLoopFromLast(){
         System.out.println("Assigns times to two nodes.");
@@ -435,6 +435,7 @@ public class GraphTest {
         g.addEdge(3, 4);
         g.addEdge(5, 4);
         g.addEdge(5, 6);
+        g.addEdge(2, 4);
         g.dfsLoop(6);
         assertFalse(g.isExplored(1));
         assertFalse(g.isExplored(2));
@@ -456,6 +457,7 @@ public class GraphTest {
         g.addEdge(3, 4);
         g.addEdge(5, 4);
         g.addEdge(5, 6);
+        g.addEdge(2, 4);
         g.dfsLoop(5);
         assertFalse(g.isExplored(1));
         assertFalse(g.isExplored(2));
@@ -465,7 +467,6 @@ public class GraphTest {
         assertFalse(g.isExplored(6));
         assertTrue(1 == g.getFinTimeOf(5));
     }
-    
     
     @Test
     public void testDfsLoopFromTwoWayNode() {
@@ -477,6 +478,7 @@ public class GraphTest {
         g.addEdge(3, 4);
         g.addEdge(5, 4);
         g.addEdge(5, 6);
+        g.addEdge(2, 4);
         g.dfsLoop(2);
         assertTrue(g.isExplored(1));
         assertTrue(g.isExplored(2));
@@ -489,6 +491,71 @@ public class GraphTest {
         int t3 = g.getFinTimeOf(3);
         assertTrue(t2 == 3);
         assertTrue((t1 == 1 && t3 == 2) || (t1 == 2 && t3 == 1));
+    }
+    
+//    1 -->-- 2       5
+//    |     / |     / |
+//    |    ↗  |   ↙   |
+//    ∨  /    ∨  /    ↓
+//    | /     | /     |
+//    3 --<-- 4       6
+
+// → ← ∟ ↔  ↓ ↑  ∧ ∨ ↖ ↗ ↘ ↙ 
+
+    @Test
+    public void testDfsOrder() {
+        System.out.println("Ordering graph.");
+        Graph g = new Graph();
+        g.addEdge(1, 2);
+        g.addEdge(1, 3);
+        g.addEdge(3, 2);
+        g.addEdge(4, 3);
+        g.addEdge(5, 4);
+        g.addEdge(5, 6);
+        g.addEdge(2, 4);
+        g.dfsOrder();
+        System.out.println(g.show());
+        assertTrue(g.isExplored(1));
+        assertTrue(g.isExplored(2));
+        assertTrue(g.isExplored(3));
+        assertTrue(g.isExplored(4));
+        assertTrue(g.isExplored(5));
+        assertTrue(g.isExplored(6));
+        assertTrue(g.getFinTimeOf(1) == 3);
+        assertTrue(g.getFinTimeOf(2) == 5);
+        assertTrue(g.getFinTimeOf(3) == 4);
+        assertTrue(g.getFinTimeOf(4) == 6);
+        assertTrue(g.getFinTimeOf(5) == 1);
+        assertTrue(g.getFinTimeOf(6) == 2);
+        assertTrue(g.getNodeWithFinTime(1) == 5);
+        assertTrue(g.getNodeWithFinTime(2) == 6);
+        assertTrue(g.getNodeWithFinTime(3) == 1);
+        assertTrue(g.getNodeWithFinTime(4) == 3);
+        assertTrue(g.getNodeWithFinTime(5) == 2);
+        assertTrue(g.getNodeWithFinTime(6) == 4);
+    }
+
+    @Test
+    public void testFlushVisits(){
+        System.out.println("Ordering graph.");
+        Graph g = new Graph();
+        g.addNode(1);
+        g.addNode(2);
+        g.addNode(3);
+        g.addNode(4);
+        g.mark(1);
+        g.mark(2);
+        g.mark(3);
+        g.mark(4);
+        assertTrue(g.isExplored(1));
+        assertTrue(g.isExplored(2));
+        assertTrue(g.isExplored(3));
+        assertTrue(g.isExplored(4));
+        g.flushVisits();
+        assertFalse(g.isExplored(1));
+        assertFalse(g.isExplored(2));
+        assertFalse(g.isExplored(3));
+        assertFalse(g.isExplored(4));
     }
 
     /**
@@ -503,202 +570,5 @@ public class GraphTest {
 //        fail("The test case is a prototype.");
     }
 
-    /**
-     * Test of getSize method, of class Graph.
-     */
-    @Test
-    public void testGetSize() {
-        System.out.println("getSize");
-        Graph instance = new Graph();
-        int expResult = 0;
-        int result = instance.getSize();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of maxNodeNum method, of class Graph.
-     */
-    @Test
-    public void testMaxNodeNum() {
-        System.out.println("maxNodeNum");
-        Graph instance = new Graph();
-        Integer expResult = null;
-        Integer result = instance.maxNodeNum();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of getFinTimeOf method, of class Graph.
-     */
-    @Test
-    public void testGetFinTimeOf() {
-        System.out.println("getFinTimeOf");
-        Integer n = null;
-        Graph instance = new Graph();
-        Integer expResult = null;
-        Integer result = instance.getFinTimeOf(n);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of addEdge method, of class Graph.
-     */
-    @Test
-    public void testAddEdge() {
-        System.out.println("addEdge");
-        Integer tail = null;
-        Integer head = null;
-        Graph instance = new Graph();
-        instance.addEdge(tail, head);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of addNode method, of class Graph.
-     */
-    @Test
-    public void testAddNode() {
-        System.out.println("addNode");
-        Integer n = null;
-        Graph instance = new Graph();
-        instance.addNode(n);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of outNodesOf method, of class Graph.
-     */
-    @Test
-    public void testOutNodesOf() {
-        System.out.println("outNodesOf");
-        Integer n = null;
-        Graph instance = new Graph();
-        Set<Integer> expResult = null;
-        Set<Integer> result = instance.outNodesOf(n);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of inNodesOf method, of class Graph.
-     */
-    @Test
-    public void testInNodesOf() {
-        System.out.println("inNodesOf");
-        Integer n = null;
-        Graph instance = new Graph();
-        Set<Integer> expResult = null;
-        Set<Integer> result = instance.inNodesOf(n);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of mark method, of class Graph.
-     */
-    @Test
-    public void testMark() {
-        System.out.println("mark");
-        int n = 0;
-        Graph instance = new Graph();
-        boolean expResult = false;
-        boolean result = instance.mark(n);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of isExplored method, of class Graph.
-     */
-    @Test
-    public void testIsExplored() {
-        System.out.println("isExplored");
-        int n = 0;
-        Graph instance = new Graph();
-        boolean expResult = false;
-        boolean result = instance.isExplored(n);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of getTime method, of class Graph.
-     */
-    @Test
-    public void testGetTime() {
-        System.out.println("getTime");
-        Graph instance = new Graph();
-        int expResult = 0;
-        int result = instance.getTime();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of tick method, of class Graph.
-     */
-    @Test
-    public void testTick() {
-        System.out.println("tick");
-        Graph instance = new Graph();
-        instance.tick();
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of nextUnExplored method, of class Graph.
-     */
-    @Test
-    public void testNextUnExplored() {
-        System.out.println("nextUnExplored");
-        Integer startNode = null;
-        Graph instance = new Graph();
-        Integer expResult = null;
-        Integer result = instance.nextUnExplored(startNode);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of assignTimeToNode method, of class Graph.
-     */
-    @Test
-    public void testAssignTimeToNode() {
-        System.out.println("assignTimeToNode");
-        Integer n = null;
-        Graph instance = new Graph();
-        instance.assignTimeToNode(n);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of dfsLoop method, of class Graph.
-     */
-    @Test
-    public void testDfsLoop() {
-        System.out.println("dfsLoop");
-        Integer n = null;
-        Graph instance = new Graph();
-        instance.dfsLoop(n);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-    
 }
 

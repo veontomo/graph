@@ -46,6 +46,11 @@ public class Graph {
     private HashMap<Integer, Integer> _finTime;
     
     /**
+     * A map from finishing time to node number. 
+     */
+    private HashMap<Integer, Integer> _timeToNode;
+    
+    /**
      * A map from node number to leader node number.
      */
     private HashMap<Integer, Integer> _leader;
@@ -95,6 +100,15 @@ public class Graph {
     }
     
     /**
+     * Returns node number with given finishing time. If no node with given 
+     * finishing time exists, null is returned.
+     * @param   t  time
+     * @return 
+     */
+    public Integer getNodeWithFinTime(Integer t){
+        return this._timeToNode.containsKey(t) ? this._timeToNode.get(t) : null;
+    };
+    /**
      * Graph constructor. 
      */
     public Graph(){
@@ -102,6 +116,7 @@ public class Graph {
         this._edgesOut = new HashMap();
         this._finTime = new HashMap();
         this._leader = new HashMap();
+        this._timeToNode = new HashMap();
     }
 
     /**
@@ -211,6 +226,14 @@ public class Graph {
     }
     
     /**
+     * Reset _finTime: every node acquires status "unexplored". 
+     */
+    public void flushVisits(){
+        for (Integer n : this._finTime.keySet()){
+            this._finTime.put(n, UNEXPLORED);
+        }
+    }
+    /**
      * _finTime getter
      * @return int
      */
@@ -262,7 +285,9 @@ public class Graph {
             throw new IllegalArgumentException("Node " + n + " does not exist"
                     + " and hence can not be assigned finishing time.");
         }
-        this._finTime.put(n, this.getTime());
+        int t = this.getTime();
+        this._finTime.put(n, t);
+        this._timeToNode.put(t, n);
     }
     
     /**
@@ -289,6 +314,28 @@ public class Graph {
 //        System.out.println("assigned finishing time " + this.getTime() + " to node " + n);
         this.assignTimeToNode(n);
 //        System.out.println("Finishing time of node " + n + " is " + this.getFinTimeOf(n));
+    }
+
+    /**
+     * 
+     * @return 
+     */
+    public String show(){
+        return "out edges: " + this._edgesOut.toString() + 
+               "\nin edges: " + this._edgesIn.toString() + 
+                "\nnode to time: " + this._finTime.toString() + 
+                "\ntime to node: " + this._timeToNode.toString();
+    };
+    
+    /**
+     * Assigns finishing time to each node
+     */
+    public void dfsOrder(){
+        Integer n = this.nextUnExplored(this.maxNodeNum());
+        while(n != null){
+            this.dfsLoop(n);
+            n = this.nextUnExplored(n);
+        }
     }
     /**
      * @param args the command line arguments
