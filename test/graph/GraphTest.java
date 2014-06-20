@@ -605,15 +605,51 @@ public class GraphTest {
     
     @Test
     public void testAssignLeader(){
-        g2.dfsOrder();
-        g2.flushVisits();
-        g2.fragmentize();
-        Set<Integer> leader6 = g2.leader(6);
-        Set<Integer> leader3 = g2.leader(3);
-        assertTrue(leader3.length() == 3);
-        assertTrue(leader5.length() == 3);
+        System.out.println("Assigning leaders");
+        g1.dfsOrder();
+        g1.flushVisits();
+        g1.fragmentize();
+        System.out.println(g1.show());
+        System.out.println(g1.getLeaderInfo());
+        Set<Integer> leader6 = g1.leader(6);
+        Set<Integer> leader2 = g1.leader(2);
+        assertTrue(leader2.size() == 3);
+        assertTrue(leader6.size() == 3);
     }
+
     
+    @Test
+    public void testAssignLeader2() {
+        System.out.println("Assigning leaders to bigger graph");
+        Graph g = new Graph();
+        g.addEdge(1, 2);
+        g.addEdge(5, 1);
+        g.addEdge(5, 2);
+        g.addEdge(4, 5);
+        g.addEdge(3, 4);
+        g.addEdge(2, 3);
+        g.addEdge(6, 2);
+        g.addEdge(3, 6);
+        g.addEdge(3, 9);
+        g.addEdge(7, 6);
+        g.addEdge(7, 12);
+        g.addEdge(9, 7);
+        g.addEdge(10, 7);
+        g.addEdge(10, 8);
+        g.addEdge(8, 9);
+        g.addEdge(11, 7);
+        g.addEdge(11, 12);
+        
+        g.dfsOrder();
+        g.flushVisits();
+        g.fragmentize();
+        System.out.println(g.show());
+        System.out.println(g.getLeaderInfo());
+//        Set<Integer> leader6 = g1.leader(6);
+//        Set<Integer> leader2 = g1.leader(2);
+//        assertTrue(leader2.size() == 3);
+//        assertTrue(leader6.size() == 3);
+    }
     
     
     /**

@@ -6,7 +6,9 @@
 
 package graph;
 import java.util.*;
-
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 
 /**
  *
@@ -51,9 +53,15 @@ public class Graph {
     private HashMap<Integer, Integer> _timeToNode;
     
     /**
-     * A map from node number to leader node number.
+     * A map from leader node number to list of node numbers.
      */
     private HashMap<Integer, Set<Integer>> _leader;
+
+    /**
+     * A map from leader node number to the number of nodes this leader possesses.
+     */
+    private HashMap<Integer, Integer> _leaderSize;
+
     
     /**
      * Maximal node number. Updated automatically every time edge or node 
@@ -117,6 +125,7 @@ public class Graph {
         this._finTime = new HashMap();
         this._leader = new HashMap();
         this._timeToNode = new HashMap();
+        this._leaderSize = new HashMap();
     }
     
     /**
@@ -129,6 +138,14 @@ public class Graph {
             return this._leader.get(n);
         }
         return null;
+    }
+    
+    /**
+     * Returns a string representation of _leaderSize
+     * @return 
+     */
+    public String getLeaderInfo(){
+        return this._leaderSize.toString();
     }
 
     /**
@@ -222,7 +239,12 @@ public class Graph {
      */
     public boolean mark(int n){
         if (this._finTime.containsKey(n) && this._finTime.get(n) == UNEXPLORED){
-            this._finTime.put(n, EXPLORED);
+            try {
+                this._finTime.put(n, EXPLORED);
+            } catch (StackOverFlowError e) {
+                System.err.println("Caught IOException: " + e.getMessage());
+            }
+            
             return true;
         }
         return false;
@@ -255,7 +277,6 @@ public class Graph {
     
     /**
      * Increases time by one unit.
-     * @return void
      */
     public void tick(){
         this._time++;
@@ -332,22 +353,43 @@ public class Graph {
     /**
      * Performs deep-first-search and assigns leader from the given node n.
      * @param n
+     * @param leader
      */
-    public void dfsLoop2(Integer n) {
-        if (!this._finTime.containsKey(n)) {
-            throw new IllegalArgumentException("Node " + n + " does not exist! "
-                    + "Can not use it to perform dfsLoop.");
-        }
+    public void dfsLoop2(Integer n, Integer leader) {
+//        System.out.println("dfsLoop2 starts with n=" + n + ", leader = " + leader);
         this.mark(n);
+        this.addToLeaderGroup(leader, n);
         Set<Integer> outNodes = this.outNodesOf(n);
         for (Integer outNode : outNodes) {
             if (!this.isExplored(outNode)) {
-                this.dfsLoop(outNode);
+                this.dfsLoop2(outNode, leader);
             }
         }
-        // make assignement of leader
+    }
+    
+    /**
+     * Adds node n to the group of leader.
+     * @param n
+     * @param leader 
+     */
+    public void addToLeaderGroup(int leader, int n){
+//        System.out.println("adding node " + n + " to leader " + leader);
+        if (this._leader.containsKey(leader)){
+//            System.out.println("leader group is not empty, adding " + n + " to the group.");
+            this._leader.get(leader).add(n);
+            int val = this._leaderSize.get(leader);
+            val++;
+            this._leaderSize.put(leader, val);
+        } else {
+//            System.out.println("leader has no group, creating group and adding " + n + " there.");
+            Set<Integer> list = new HashSet();
+            list.add(n);
+            this._leader.put(leader, list);
+            this._leaderSize.put(leader, 1);
+        }
     }
 
+    
     /**
      * 
      * @return 
@@ -356,7 +398,8 @@ public class Graph {
         return "out edges: " + this._edgesOut.toString() + 
                "\nin edges: " + this._edgesIn.toString() + 
                 "\nnode to time: " + this._finTime.toString() + 
-                "\ntime to node: " + this._timeToNode.toString();
+                "\ntime to node: " + this._timeToNode.toString() +
+                "\nleader: " + this._leader.toString();
     };
     
     /**
@@ -374,11 +417,19 @@ public class Graph {
      * Parses all nodes
      */
     public void fragmentize(){
+//        System.out.println("fragmentizing:");
         Integer t = this.getTime();
+//        System.out.println("time: " + t);
         Integer n;
         while (t > 0) {
+//            System.out.println("time: " + t);
             n = this.getNodeWithFinTime(t);
-            this.dfsLoop2(n);
+//            System.out.println("new starting node: " + n);
+            while(!this.isExplored(n)){
+//                System.out.println("the node has not been explored yet, starting dfsLoop2...");
+                this.dfsLoop2(n, n);
+            }
+            t--;
         }
 
     }
@@ -387,7 +438,48 @@ public class Graph {
      */
     public static void main(String[] args) {
         // TODO code application logic here
-        System.out.println("start graph");
+        System.out.println("loading graph");
+        BufferedReader br = null;
+        Graph g = new Graph();
+        String fileName = "c:\\Users\\Andrea\\Documents\\courses\\algo\\Homework4\\SCC.txt";
+        try {
+            String sCurrentLine;
+            String[] data;
+            br = new BufferedReader(new FileReader(fileName));
+            while ((sCurrentLine = br.readLine()) != null) {
+                data = sCurrentLine.trim().split(" ");
+                if (data.length != 2){
+                    throw new IllegalArgumentException("Line must contain exactly two numbers!");
+                }
+                int tail = Integer.parseInt(data[0]);
+                int head = Integer.parseInt(data[1]);
+                g.addEdge(tail, head);
+//                System.out.println(sCurrentLine);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (br != null) {
+                    br.close();
+                }
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+        System.out.println("Graph is loaded with " + g.getSize() + " nodes.");
+        System.out.println("Ordering graph");
+        g.dfsOrder();
+        System.out.println("Graph is ordered");
+        g.flushVisits();
+        System.out.println("Fragmentizing graph");
+        g.fragmentize();
+        System.out.println("Fragmetizing is over");
+//        System.out.println(g.show());
+        System.out.println(g.getLeaderInfo());
+//        System.out.println(g.show());
+
+    
     }
     
 }
