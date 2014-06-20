@@ -20,6 +20,9 @@ import org.junit.Before;
  */
 public class GraphTest {
     
+    private Graph g1;
+    private Graph g2;
+    
     public GraphTest() {
     }
     
@@ -33,10 +36,40 @@ public class GraphTest {
 
     @Before
     public void setUp() throws Exception {
+    //  → ← ∟ ↔  ↓ ↑  ∧ ∨ ↖ ↗ ↘ ↙ 
+    //                                 _ 
+    // 1 --->--- 2 --->--- 4 --->--- 5/  \
+    //  ↖       /           ↖       / \__/
+    //    \    /              \    /
+    //     \ ↙                 \ ↙
+    //      3                   6
+    // 
+        g1 = new Graph();
+        g1.addEdge(1, 2);
+        g1.addEdge(3, 1);
+        g1.addEdge(2, 3);
+        g1.addEdge(2, 4);
+        g1.addEdge(6, 4);
+        g1.addEdge(4, 5);
+        g1.addEdge(5, 6);
+        g1.addEdge(5, 5);
+        
+    //    1   2
+    //    
+    //    3   4
+    //
+        g2 = new Graph();
+        g2.addNode(1);
+        g2.addNode(2);
+        g2.addNode(3);
+        g2.addNode(4);
+        
+        
     }
 
     @After
     public void tearDown() throws Exception {
+        g1 = null;
     }
 
     /**
@@ -492,15 +525,6 @@ public class GraphTest {
         assertTrue(t2 == 3);
         assertTrue((t1 == 1 && t3 == 2) || (t1 == 2 && t3 == 1));
     }
-    
-//    1 -->-- 2       5
-//    |     / |     / |
-//    |    ↗  |   ↙   |
-//    ∨  /    ∨  /    ↓
-//    | /     | /     |
-//    3 --<-- 4       6
-
-// → ← ∟ ↔  ↓ ↑  ∧ ∨ ↖ ↗ ↘ ↙ 
 
     @Test
     public void testDfsOrder() {
@@ -535,29 +559,63 @@ public class GraphTest {
         assertTrue(g.getNodeWithFinTime(6) == 4);
     }
 
+  //  → ← ∟ ↔  ↓ ↑  ∧ ∨ ↖ ↗ ↘ ↙ 
     @Test
-    public void testFlushVisits(){
-        System.out.println("Ordering graph.");
-        Graph g = new Graph();
-        g.addNode(1);
-        g.addNode(2);
-        g.addNode(3);
-        g.addNode(4);
-        g.mark(1);
-        g.mark(2);
-        g.mark(3);
-        g.mark(4);
-        assertTrue(g.isExplored(1));
-        assertTrue(g.isExplored(2));
-        assertTrue(g.isExplored(3));
-        assertTrue(g.isExplored(4));
-        g.flushVisits();
-        assertFalse(g.isExplored(1));
-        assertFalse(g.isExplored(2));
-        assertFalse(g.isExplored(3));
-        assertFalse(g.isExplored(4));
+    public void testDfsOrderWithSelfLoop() {
+        g1.dfsOrder();
+        System.out.println(g1.show());
+        assertTrue(g1.isExplored(1));
+        assertTrue(g1.isExplored(2));
+        assertTrue(g1.isExplored(3));
+        assertTrue(g1.isExplored(4));
+        assertTrue(g1.isExplored(5));
+        assertTrue(g1.isExplored(6));
+        assertTrue(g1.getFinTimeOf(1) == 2);
+        assertTrue(g1.getFinTimeOf(2) == 3);
+        assertTrue(g1.getFinTimeOf(3) == 1);
+        assertTrue(g1.getFinTimeOf(4) == 4);
+        assertTrue(g1.getFinTimeOf(5) == 5);
+        assertTrue(g1.getFinTimeOf(6) == 6);
+        assertTrue(g1.getNodeWithFinTime(1) == 3);
+        assertTrue(g1.getNodeWithFinTime(2) == 1);
+        assertTrue(g1.getNodeWithFinTime(3) == 2);
+        assertTrue(g1.getNodeWithFinTime(4) == 4);
+        assertTrue(g1.getNodeWithFinTime(5) == 5);
+        assertTrue(g1.getNodeWithFinTime(6) == 6);
     }
 
+    
+    @Test
+    public void testFlushVisits(){
+        System.out.println("Setting every node status to be unexplored.");
+        g2.mark(1);
+        g2.mark(2);
+        g2.mark(3);
+        g2.mark(4);
+        assertTrue(g2.isExplored(1));
+        assertTrue(g2.isExplored(2));
+        assertTrue(g2.isExplored(3));
+        assertTrue(g2.isExplored(4));
+        g2.flushVisits();
+        assertFalse(g2.isExplored(1));
+        assertFalse(g2.isExplored(2));
+        assertFalse(g2.isExplored(3));
+        assertFalse(g2.isExplored(4));
+    }
+    
+    @Test
+    public void testAssignLeader(){
+        g2.dfsOrder();
+        g2.flushVisits();
+        g2.fragmentize();
+        Set<Integer> leader6 = g2.leader(6);
+        Set<Integer> leader3 = g2.leader(3);
+        assertTrue(leader3.length() == 3);
+        assertTrue(leader5.length() == 3);
+    }
+    
+    
+    
     /**
      * Test of main method, of class Graph.
      */

@@ -53,7 +53,7 @@ public class Graph {
     /**
      * A map from node number to leader node number.
      */
-    private HashMap<Integer, Integer> _leader;
+    private HashMap<Integer, Set<Integer>> _leader;
     
     /**
      * Maximal node number. Updated automatically every time edge or node 
@@ -117,6 +117,18 @@ public class Graph {
         this._finTime = new HashMap();
         this._leader = new HashMap();
         this._timeToNode = new HashMap();
+    }
+    
+    /**
+     * Returns list of nodes having as a leader node n.
+     * @param n
+     * @return Set
+     */
+    public Set<Integer> leader(Integer n){
+        if (this._leader.containsKey(n)){
+            return this._leader.get(n);
+        }
+        return null;
     }
 
     /**
@@ -315,6 +327,26 @@ public class Graph {
         this.assignTimeToNode(n);
 //        System.out.println("Finishing time of node " + n + " is " + this.getFinTimeOf(n));
     }
+    
+    
+    /**
+     * Performs deep-first-search and assigns leader from the given node n.
+     * @param n
+     */
+    public void dfsLoop2(Integer n) {
+        if (!this._finTime.containsKey(n)) {
+            throw new IllegalArgumentException("Node " + n + " does not exist! "
+                    + "Can not use it to perform dfsLoop.");
+        }
+        this.mark(n);
+        Set<Integer> outNodes = this.outNodesOf(n);
+        for (Integer outNode : outNodes) {
+            if (!this.isExplored(outNode)) {
+                this.dfsLoop(outNode);
+            }
+        }
+        // make assignement of leader
+    }
 
     /**
      * 
@@ -336,6 +368,19 @@ public class Graph {
             this.dfsLoop(n);
             n = this.nextUnExplored(n);
         }
+    }
+    
+    /**
+     * Parses all nodes
+     */
+    public void fragmentize(){
+        Integer t = this.getTime();
+        Integer n;
+        while (t > 0) {
+            n = this.getNodeWithFinTime(t);
+            this.dfsLoop2(n);
+        }
+
     }
     /**
      * @param args the command line arguments
