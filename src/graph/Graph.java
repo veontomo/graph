@@ -9,6 +9,7 @@ import java.util.*;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 
 /**
  *
@@ -16,34 +17,24 @@ import java.io.IOException;
  */
 public class Graph {
     
-    /**
-     * Code to mark unvisited nodes (just added)
-     */
-    private static Integer UNEXPLORED = -2;
-    
-    /**
-     * Code to mark node that has already been visited, but has not been 
-     * assigned any finishing time.
-     */
-    private static Integer EXPLORED = -1;
     
     /**
      * A map from node number to list of node numbers corresponding to nodes 
      * from which it is possible to arrive to the given node.
      */
-    private HashMap<Integer, Set<Integer>> _edgesIn;
+//    private HashMap<Integer, Set<Integer>> _edgesIn;
     
     /**
      * A map from node number to list of node numbers corresponding to nodes
-     * to which it is possible to arrive from the given node.
+     * that are linked to the given one. 
+     * m => [n1, n2, ...]
+     * If n is positive, then there is an edge (m, n), if n is negative then 
+     * there is an edge (-n, m).
      */
     private HashMap<Integer, Set<Integer>> _edgesOut;
     
     /**
-     * A map from node number to finishing time. By default, for newly added 
-     * node, the finishing time is set to Graph::UNEXPLORED. Nodes that have 
-     * been explored but finishing time has not been assigned yet, are 
-     * marked Graph::EXPLORED. 
+     * A map from node number to finishing time.
      */
     private HashMap<Integer, Integer> _finTime;
     
@@ -52,6 +43,12 @@ public class Graph {
      */
     private HashMap<Integer, Integer> _timeToNode;
     
+    /**
+     * Map from node number into a boolean variable represented whether the 
+     * node has been explored or not.
+     */
+    private HashMap<Integer, Boolean> _nodes;
+        
     /**
      * A map from leader node number to list of node numbers.
      */
@@ -71,19 +68,49 @@ public class Graph {
     
     
     /**
+     * Minimal node number. Updated automatically every time edge or node 
+     * is inserted
+     */
+    private Integer _minNodeNumber = null;
+    
+    
+    /**
      * The number of nodes in the graph
      */
-    private int _size = 0;
+    private Integer _size = 0;
     
     /**
      * Current time
      */
-    private int _time = 0;
+    private Integer _time = 0;
+   
+    
+    /** debug variables
+     * 
+     */
+    private Integer _depth = 0;      // recursive call depth
+    private Integer _markCalls = 0;  // counter of calls of mark
+    
+    
+ 
+    
+    /**
+     * Graph constructor. 
+     */
+    public Graph(){
+//        this._edgesIn = new HashMap();
+        this._edgesOut = new HashMap();
+        this._finTime = new HashMap();
+        this._leader = new HashMap();
+        this._timeToNode = new HashMap();
+        this._leaderSize = new HashMap();
+        this._nodes = new HashMap();
+    }
     /**
      * _size getter.
-     * @return int
+     * @return Integer
      */
-    public int getSize(){
+    public Integer getSize(){
         return this._size;
     }
     
@@ -96,15 +123,25 @@ public class Graph {
     }
     
     /**
+     * Returns true if node n exists (i.e. is present in _nodes hash) 
+     * and false otherwise.
+     * @param n
+     * @return boolean
+     */
+    public boolean nodeExists(Integer n){
+        return this._nodes.containsKey(n);
+    }
+    
+    /**
      * Returns finishing time for node n.
      * @param n  node number
      * @return Integer
      */
-    public Integer getFinTimeOf(Integer n){
-        if (!this._finTime.containsKey(n)){
-            throw new IllegalArgumentException("Node does not exist!");
+    public Integer getFinTimeOfNode(Integer n){
+        if (this.nodeExists(n)){
+            return this._finTime.get(n);
         }
-        return this._finTime.get(n);
+        throw new IllegalArgumentException("Node does not exist!");
     }
     
     /**
@@ -116,17 +153,7 @@ public class Graph {
     public Integer getNodeWithFinTime(Integer t){
         return this._timeToNode.containsKey(t) ? this._timeToNode.get(t) : null;
     };
-    /**
-     * Graph constructor. 
-     */
-    public Graph(){
-        this._edgesIn = new HashMap();
-        this._edgesOut = new HashMap();
-        this._finTime = new HashMap();
-        this._leader = new HashMap();
-        this._timeToNode = new HashMap();
-        this._leaderSize = new HashMap();
-    }
+
     
     /**
      * Returns list of nodes having as a leader node n.
@@ -147,7 +174,7 @@ public class Graph {
     public String getLeaderInfo(){
         return this._leaderSize.toString();
     }
-
+ 
     /**
      * Registers edge inside src.
      * If src has no key i, adds it. Then, if the set corresponding to key value i 
@@ -159,14 +186,31 @@ public class Graph {
      * @return  boolean
      */
     private boolean _registerEdge(HashMap<Integer, Set<Integer>> src, Integer i, Integer j){
+        this.addNode(i);
+        if (Objects.equals(i, j)){
+            System.out.println("Self-loop on node " + i + " is ignored. Node is "
+                    + "added to the set of nodes.");
+            return true;
+        }
+        this.addNode(j);
+        boolean outcome = true; 
+        /// adding edge (i, j)
         if (src.containsKey(i)){
-             return src.get(i).add(j);
+            outcome =  src.get(i).add(j);
         } else {
             Set<Integer> list = new HashSet();
             list.add(j);
             src.put(i, list);
         }
-        return true;
+        /// adding edge (j, -i)
+        if (src.containsKey(j)) {
+            outcome = outcome & src.get(j).add(-i);
+        } else {
+            Set<Integer> list = new HashSet();
+            list.add(-i);
+            src.put(j, list);
+        }
+        return outcome;
     };
     
     /**
@@ -175,22 +219,26 @@ public class Graph {
      * @param head number of head node
      */
     public void addEdge(Integer tail, Integer head){
+        if (tail <= 0 || head <= 0){
+            throw new IllegalArgumentException("Both node numbers must be positive!");
+        };
         this._registerEdge(this._edgesOut, tail, head);
-        this._registerEdge(this._edgesIn, head, tail);
-        this.addNode(tail);
-        this.addNode(head);
+//        this._registerEdge(this._edgesIn, head, tail);
     }
     
     /**
-     * Adds _finTime contains no key n, then mapping  n => UNEXPLORED is added into _times and
-     * _maxNodeNumber and _size are updated.
+     * Adds node n to the list of all nodes if it is not present there.
+     * Updates values of _maxNodeNumber, _minNodeNumber and _size.
      * @param n node number
      */
     public void addNode(Integer n){
-        if (!this._finTime.containsKey(n)){
-            this._finTime.put(n, UNEXPLORED);
+        if (!this.nodeExists(n)) {
+            this._nodes.put(n, false);
             if (this._maxNodeNumber == null || this._maxNodeNumber < n) {
                 this._maxNodeNumber = n;
+            }
+            if (this._minNodeNumber == null || this._minNodeNumber > n) {
+                this._minNodeNumber = n;
             }
             this._size++;
         }
@@ -216,38 +264,52 @@ public class Graph {
      * @return Set
      */
     public Set<Integer> outNodesOf(Integer n){
-        Set<Integer> res = this._edgesOut.get(n);
-        return (res == null) ? (new HashSet()) : res;
+        Set<Integer> res = new HashSet(),
+                     edges = this._edgesOut.get(n);
+        if (!edges.isEmpty()) {
+            for (Integer i : edges){
+                if (i > 0){
+                    res.add(i);
+                }
+            }
+        }
+        return res;
 
     }
     
-        /**
+    /**
      * Returns set of out-nodes of the given one.
      * @param n
      * @return Set
      */
     public Set<Integer> inNodesOf(Integer n){
-        Set<Integer> res = this._edgesIn.get(n);
-        return (res == null) ? (new HashSet()) : res;
+        Set<Integer> res = new HashSet(),
+                edges = this._edgesOut.get(n);
+        if (!edges.isEmpty()){
+            for (Integer i : edges) {
+                if (i < 0) {
+                    res.add(-i);
+                }
+            }
+        }
+        return res;    
     }
     
     /**
-     * Marks node number n as explored. Returns true if node exists and has not 
-     * been explored yet. Otherwise returns false.
+     * Marks node number n as explored. Throws an exception if node
+     * does not exist or if it has already been marked as explored.
      * @param  n 
-     * @return boolean
      */
-    public boolean mark(int n){
-        if (this._finTime.containsKey(n) && this._finTime.get(n) == UNEXPLORED){
-            try {
-                this._finTime.put(n, EXPLORED);
-            } catch (StackOverFlowError e) {
-                System.err.println("Caught IOException: " + e.getMessage());
-            }
-            
-            return true;
+    public void mark(Integer n){
+        if (!this._nodes.containsKey(n)){
+            throw new IllegalArgumentException("Node " + n + " does not exist "
+                    + "and can not be marked as explored.");
         }
-        return false;
+        if (this._nodes.get(n)){
+            throw new IllegalArgumentException("Node " + n + " has already been"
+                    + " explored and can not be re-marked!");
+        }
+        this._nodes.put(n, true);
     }
     
     /** 
@@ -255,23 +317,27 @@ public class Graph {
      * @param n
      * @return boolean
      */
-    public boolean isExplored(int n){
-        return (this._finTime.containsKey(n) && this._finTime.get(n) != UNEXPLORED);
+    public boolean isExplored(Integer n){
+        if (!this._nodes.containsKey(n)){
+            throw new IllegalArgumentException("Node " + n + " does not exist "
+                    + "and can not be asked if it is explored.");
+        }
+        return this._nodes.get(n);
     }
     
     /**
-     * Reset _finTime: every node acquires status "unexplored". 
+     * Sets boolean part of _nodes to false: every node acquires status "unexplored". 
      */
     public void flushVisits(){
-        for (Integer n : this._finTime.keySet()){
-            this._finTime.put(n, UNEXPLORED);
+        for (Integer n : this._nodes.keySet()){
+            this._nodes.put(n, false);
         }
     }
     /**
-     * _finTime getter
-     * @return int
+     * _time getter
+     * @return Integer
      */
-    public int getTime(){
+    public Integer getTime(){
         return this._time;
     }
     
@@ -284,25 +350,29 @@ public class Graph {
     
     /**
      * Gets number of the next unexplored node which number is not greater than
-     * start. If no such node exists, null is returned.
+     * startNode. If no such node exists, null is returned.
      * @param startNode  node number from which to start the search
      * @return Integer|Null
      */
     public Integer nextUnExplored(Integer startNode){
-        if (!this._finTime.containsKey(startNode)){
-            throw new IllegalArgumentException("Start node must exist!");
+        if (!this._nodes.containsKey(startNode)){
+            throw new IllegalArgumentException("Start node " +startNode+" must "
+                    + " exist in order to find next unexplored node!");
         }
-        int status = this._finTime.get(startNode);
-        if (status == UNEXPLORED){
-            return startNode;
-        }
-        while (status != UNEXPLORED && startNode >= 0){
-            startNode--;
-            if (this._finTime.containsKey(startNode)){
-                status = this._finTime.get(startNode);
-                if (status == UNEXPLORED){
-                    return startNode;
-                }
+        Integer currentNode = startNode;
+        boolean status;
+        Integer minNodeNum = this._minNodeNumber;
+        while (currentNode >= minNodeNum){
+            status = this._nodes.get(currentNode);
+            if (!status) {
+                return currentNode;
+            }
+            currentNode--;
+            while (currentNode >= minNodeNum && !this._nodes.containsKey(currentNode) ){
+                currentNode--;
+            }
+            if (currentNode < minNodeNum){
+                return null;
             }
         }
         return null;
@@ -313,12 +383,12 @@ public class Graph {
      * Assigns current time to node n.
      * @param n  node number to which assign current time.
      */
-    public void assignTimeToNode(Integer n){
-        if (!this._finTime.containsKey(n)){
+    public void setFinTimeToNode(Integer n){
+        if (!this._nodes.containsKey(n)){
             throw new IllegalArgumentException("Node " + n + " does not exist"
                     + " and hence can not be assigned finishing time.");
         }
-        int t = this.getTime();
+        Integer t = this.getTime();
         this._finTime.put(n, t);
         this._timeToNode.put(t, n);
     }
@@ -328,25 +398,30 @@ public class Graph {
      * @param n 
      */
     public void dfsLoop(Integer n){
-        if (!this._finTime.containsKey(n)){
+        if (!this._nodes.containsKey(n)){
             throw new IllegalArgumentException("Node " + n + " does not exist! "
                     + "Can not use it to perform dfsLoop.");
         }
+//        this._depth++;
+//        System.out.println("dfsLoop depth: " + this._depth);
 //        System.out.println("Start from node " + n);
 //        System.out.println("Its fintime: " + this._finTime.get(n));
         this.mark(n);
 //        System.out.println("Node " + n + " marked as explored. Its fintime: " + this._finTime.get(n));
         Set<Integer> inNodes = this.inNodesOf(n);
-        for(Integer inNode : inNodes){
-//            System.out.println("Consider node " + inNode);
-            if (!this.isExplored(inNode)){
-                this.dfsLoop(inNode);
+//        System.out.println("Node " + n + " has " + inNodes.size() + "in-edges...");
+        if (!inNodes.isEmpty()){
+            for (Integer inNode : inNodes) {
+                if (!this.isExplored(inNode)) {
+                    this.dfsLoop(inNode);
+                }
             }
         }
         this.tick();
 //        System.out.println("assigned finishing time " + this.getTime() + " to node " + n);
-        this.assignTimeToNode(n);
-//        System.out.println("Finishing time of node " + n + " is " + this.getFinTimeOf(n));
+        this.setFinTimeToNode(n);
+//        System.out.println("Finishing time of node " + n + " is " + this.getFinTimeOfNode(n));
+//        this._depth--;
     }
     
     
@@ -372,12 +447,12 @@ public class Graph {
      * @param n
      * @param leader 
      */
-    public void addToLeaderGroup(int leader, int n){
+    public void addToLeaderGroup(Integer leader, Integer n){
 //        System.out.println("adding node " + n + " to leader " + leader);
         if (this._leader.containsKey(leader)){
 //            System.out.println("leader group is not empty, adding " + n + " to the group.");
             this._leader.get(leader).add(n);
-            int val = this._leaderSize.get(leader);
+            Integer val = this._leaderSize.get(leader);
             val++;
             this._leaderSize.put(leader, val);
         } else {
@@ -396,7 +471,7 @@ public class Graph {
      */
     public String show(){
         return "out edges: " + this._edgesOut.toString() + 
-               "\nin edges: " + this._edgesIn.toString() + 
+//               "\nin edges: " + this._edgesIn.toString() + 
                 "\nnode to time: " + this._finTime.toString() + 
                 "\ntime to node: " + this._timeToNode.toString() +
                 "\nleader: " + this._leader.toString();
@@ -407,7 +482,7 @@ public class Graph {
      */
     public void dfsOrder(){
         Integer n = this.nextUnExplored(this.maxNodeNum());
-        while(n != null){
+         while(n != null){
             this.dfsLoop(n);
             n = this.nextUnExplored(n);
         }
@@ -428,6 +503,7 @@ public class Graph {
             while(!this.isExplored(n)){
 //                System.out.println("the node has not been explored yet, starting dfsLoop2...");
                 this.dfsLoop2(n, n);
+                System.out.println("cluster " + n + " size: " + this._leader.get(n).size() );
             }
             t--;
         }
@@ -441,20 +517,26 @@ public class Graph {
         System.out.println("loading graph");
         BufferedReader br = null;
         Graph g = new Graph();
-        String fileName = "c:\\Users\\Andrea\\Documents\\courses\\algo\\Homework4\\SCC.txt";
+        String fileName = "SCC_med.txt";
         try {
+            Integer counter = 0;
+            Integer tail, head;
             String sCurrentLine;
             String[] data;
             br = new BufferedReader(new FileReader(fileName));
             while ((sCurrentLine = br.readLine()) != null) {
+                counter++;
                 data = sCurrentLine.trim().split(" ");
                 if (data.length != 2){
                     throw new IllegalArgumentException("Line must contain exactly two numbers!");
                 }
-                int tail = Integer.parseInt(data[0]);
-                int head = Integer.parseInt(data[1]);
+                tail = Integer.parseInt(data[0]);
+                head = Integer.parseInt(data[1]);
                 g.addEdge(tail, head);
-//                System.out.println(sCurrentLine);
+//                if (counter % 10000 == 0){
+//                    System.out.println("" + counter + ": " + g.maxNodeNum() );
+//                }
+                
             }
         } catch (IOException e) {
             e.printStackTrace();

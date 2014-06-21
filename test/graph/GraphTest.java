@@ -20,8 +20,7 @@ import org.junit.Before;
  */
 public class GraphTest {
     
-    private Graph g1;
-    private Graph g2;
+    private Graph g1, g2, g3;
     
     public GraphTest() {
     }
@@ -63,8 +62,22 @@ public class GraphTest {
         g2.addNode(2);
         g2.addNode(3);
         g2.addNode(4);
-        
-        
+      
+//      1 --->--- 2 ---<--- 6 --->--- 7 
+//      |         |         |
+//      |         ^         | 
+//      v         |         v
+//      3 ---<--- 4 ---<--- 5 ---<--- 8     
+        g3 = new Graph();
+        g3.addEdge(1, 3);
+        g3.addEdge(1, 2);
+        g3.addEdge(4, 3);
+        g3.addEdge(4, 2);
+        g3.addEdge(5, 4);
+        g3.addEdge(6, 2);
+        g3.addEdge(6, 5);
+        g3.addEdge(6, 7);
+        g3.addEdge(8, 5);
     }
 
     @After
@@ -93,7 +106,7 @@ public class GraphTest {
         Graph g = new Graph();
         g.addEdge(1, 2);
         boolean result = g.edgeExists(5, 7);
-        assertEquals(false, result);
+        assertFalse(result);
     }
 
     /**
@@ -111,14 +124,14 @@ public class GraphTest {
     /**
      * Test of edgeExists method, of class Graph.
      */
-    @Test
-    public void testEdgeExistsIfSelfLoopExists() {
-        System.out.println("Must return true if asked about a self-loop that exists.");
-        Graph g = new Graph();
-        g.addEdge(10, 10);
-        boolean result = g.edgeExists(10, 10);
-        assertTrue(result);
-    }
+//    @Test
+//    public void testEdgeExistsIfSelfLoopExists() {
+//        System.out.println("Must return true if asked about a self-loop that exists.");
+//        Graph g = new Graph();
+//        g.addEdge(10, 10);
+//        boolean result = g.edgeExists(10, 10);
+//        assertTrue(result);
+//    }
 
     /**
      * Test of edgeExists method, of class Graph.
@@ -148,7 +161,7 @@ public class GraphTest {
     public void testEmptyGraphLength() {
         System.out.println("Returns zero for empty graph");
         Graph g = new Graph();
-        assertEquals(0, g.getSize());
+        assertTrue(0 == g.getSize());
     }
     
     @Test
@@ -156,7 +169,7 @@ public class GraphTest {
         System.out.println("Returns 1 for single node graph");
         Graph g = new Graph();
         g.addNode(5);
-        assertEquals(1, g.getSize());
+        assertTrue(1 == g.getSize());
     }
     
     @Test
@@ -164,7 +177,7 @@ public class GraphTest {
         System.out.println("Returns 1 for single node graph with self-loop");
         Graph g = new Graph();
         g.addEdge(1,1);
-        assertEquals(1, g.getSize());
+        assertTrue(1 == g.getSize());
     }
 
 
@@ -177,7 +190,7 @@ public class GraphTest {
         g.addNode(5);
         g.addNode(6);
         g.addNode(9);
-        assertEquals(5, g.getSize());
+        assertTrue(5 == g.getSize());
     }
 
     @Test
@@ -189,7 +202,7 @@ public class GraphTest {
         g.addNode(2);
         g.addNode(2);
         g.addNode(1);
-        assertEquals(2, g.getSize());
+        assertTrue(2 == g.getSize());
     }
 
     @Test
@@ -200,7 +213,7 @@ public class GraphTest {
         g.addEdge(5, 7);
         g.addEdge(2, 5);
         g.addEdge(4, 3);
-        assertEquals(6, g.getSize());
+        assertTrue(6 == g.getSize());
     }
     
     @Test
@@ -240,12 +253,11 @@ public class GraphTest {
 
     @Test
     public void testGetOutNodesEmpty() {
-        System.out.println("Returns empty set if there are no out-nodes");
-        Graph g = new Graph();
-        g.addEdge(9, 2);
-        g.addEdge(9, 4);
-        g.addEdge(1, 9);
-        Set<Integer> list = g.outNodesOf(2);
+        System.out.println("Returns empty set if node has no out-edges");
+        g2.addEdge(3, 7);
+        g2.addEdge(2, 7);
+        g2.addEdge(4, 7);
+        Set<Integer> list = g2.outNodesOf(7);
         assertEquals(0, list.size());
     }
 
@@ -253,48 +265,48 @@ public class GraphTest {
     @Test
     public void testGetOutNodes() {
         System.out.println("Returns set of out-nodes");
-        Graph g = new Graph();
-        g.addEdge(9, 2);
-        g.addEdge(9, 4);
-        g.addEdge(1, 9);
-        g.addEdge(3, 9);
-        Set<Integer> list = g.outNodesOf(9);
+        System.out.println(g3.show());
+        Set<Integer> list = g3.outNodesOf(4);
         assertEquals(2, list.size());
         assertTrue(list.contains(2));
-        assertTrue(list.contains(4));
+        assertTrue(list.contains(3));
     }
     
     @Test
     public void testGetInNodesEmpty() {
-        System.out.println("Returns empty set if there are no in-nodes");
-        Graph g = new Graph();
-        g.addEdge(9, 2);
-        g.addEdge(1, 9);
-        Set<Integer> list = g.inNodesOf(1);
+        System.out.println("Returns empty set if node has no in-edges");
+        g2.addEdge(7, 3);
+        g2.addEdge(7, 2);
+        g2.addEdge(7, 4);
+        Set<Integer> list = g2.inNodesOf(7);
         assertEquals(0, list.size());
     }
     
+// 1 --->--- 2 ---<--- 6 --->--- 7 
+// |         |         |
+// |         ^         | 
+// v         |         v
+// 3 ---<--- 4 ---<--- 5 ---<--- 8   
+    
+    
     @Test
     public void testGetInNodes(){
-        System.out.println("Returns set of out-nodes");
-        Graph g = new Graph();
-        g.addEdge(9, 2);
-        g.addEdge(9, 4);
-        g.addEdge(1, 9);
-        Set<Integer> list = g.inNodesOf(9);
-        assertEquals(1, list.size());
-        assertTrue(list.contains(1));
+        System.out.println("Returns set of in-nodes");
+        Set<Integer> list = g3.inNodesOf(5);
+        assertEquals(2, list.size());
+        assertTrue(list.contains(6));
+        assertTrue(list.contains(8));
     }
     
     
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testMarkNonExistentNode() {
-        System.out.println("Returns false if one tries to mark as explored a "
+        System.out.println("Throws exception if one marks as explored a "
                 + "node that does not exist.");
         Graph g = new Graph();
         g.addNode(9);
         g.addNode(4);
-        assertFalse(g.mark(1));
+        g.mark(1);
     }
 
     @Test
@@ -303,25 +315,26 @@ public class GraphTest {
         Graph g = new Graph();
         g.addNode(9);
         g.addNode(4);
-        assertTrue(g.mark(4));
+        g.mark(4);
+        assertTrue(g.isExplored(4));
     }
     
     
-    @Test
-    public void testMarkExplored() {
-        System.out.println("Returns false if one tries to mark as explored a "
-                + "node that has already been explored.");
-        Graph g = new Graph();
-        g.addNode(4);
-        g.addNode(5);
-        g.mark(5);
-        assertFalse(g.mark(5));
-    }
+//    @Test
+//    public void testMarkExplored() {
+//        System.out.println("Returns false if one tries to mark as explored a "
+//                + "node that has already been explored.");
+//        Graph g = new Graph();
+//        g.addNode(4);
+//        g.addNode(5);
+//        g.mark(5);
+//        assertFalse(g.mark(5));
+//    }
 
     
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testIsExploredIfNotExists() {
-        System.out.println("Returns false if one tries to find out whether an "
+        System.out.println("Throws exception if one asks whether a "
                 + "non-existent node has been explored.");
         Graph g = new Graph();
         g.addNode(4);
@@ -357,15 +370,15 @@ public class GraphTest {
         g.addNode(3);
         g.addNode(2);
         g.tick();
-        g.assignTimeToNode(3);
-        assertTrue(g.isExplored(3));
+        g.setFinTimeToNode(3);
+        assertTrue(g.getFinTimeOfNode(3) == 1);
     }
 
     @Test
     public void testTimeInitial() {
         System.out.println("Returns zero as starting time.");
         Graph g = new Graph();
-        assertEquals(0, g.getTime());
+        assertTrue(0 == g.getTime());
     }
 
     
@@ -374,7 +387,7 @@ public class GraphTest {
         System.out.println("Returns 1 after first tick.");
         Graph g = new Graph();
         g.tick();
-        assertEquals(1, g.getTime());
+        assertTrue(1 == g.getTime());
     }
 
     
@@ -385,7 +398,7 @@ public class GraphTest {
         g.tick();
         g.tick();
         g.tick();
-        assertEquals(3, g.getTime());
+        assertTrue(3 == g.getTime());
     }
 
 
@@ -418,7 +431,7 @@ public class GraphTest {
         g.addNode(8);
         g.mark(3);
         g.mark(8);
-        System.out.println(g.nextUnExplored(7));
+        assertTrue(7 == g.nextUnExplored(7));
     }
     
     @Test
@@ -476,8 +489,8 @@ public class GraphTest {
         assertFalse(g.isExplored(4));
         assertTrue(g.isExplored(5));
         assertTrue(g.isExplored(6));
-        assertTrue(2 == g.getFinTimeOf(6));
-        assertTrue(1 == g.getFinTimeOf(5));
+        assertTrue(2 == g.getFinTimeOfNode(6));
+        assertTrue(1 == g.getFinTimeOfNode(5));
     }
     
     @Test
@@ -498,7 +511,7 @@ public class GraphTest {
         assertFalse(g.isExplored(4));
         assertTrue(g.isExplored(5));
         assertFalse(g.isExplored(6));
-        assertTrue(1 == g.getFinTimeOf(5));
+        assertTrue(1 == g.getFinTimeOfNode(5));
     }
     
     @Test
@@ -519,9 +532,9 @@ public class GraphTest {
         assertFalse(g.isExplored(4));
         assertFalse(g.isExplored(5));
         assertFalse(g.isExplored(6));
-        int t1 = g.getFinTimeOf(1);
-        int t2 = g.getFinTimeOf(2);
-        int t3 = g.getFinTimeOf(3);
+        int t1 = g.getFinTimeOfNode(1);
+        int t2 = g.getFinTimeOfNode(2);
+        int t3 = g.getFinTimeOfNode(3);
         assertTrue(t2 == 3);
         assertTrue((t1 == 1 && t3 == 2) || (t1 == 2 && t3 == 1));
     }
@@ -545,12 +558,12 @@ public class GraphTest {
         assertTrue(g.isExplored(4));
         assertTrue(g.isExplored(5));
         assertTrue(g.isExplored(6));
-        assertTrue(g.getFinTimeOf(1) == 3);
-        assertTrue(g.getFinTimeOf(2) == 5);
-        assertTrue(g.getFinTimeOf(3) == 4);
-        assertTrue(g.getFinTimeOf(4) == 6);
-        assertTrue(g.getFinTimeOf(5) == 1);
-        assertTrue(g.getFinTimeOf(6) == 2);
+        assertTrue(g.getFinTimeOfNode(1) == 3);
+        assertTrue(g.getFinTimeOfNode(2) == 5);
+        assertTrue(g.getFinTimeOfNode(3) == 4);
+        assertTrue(g.getFinTimeOfNode(4) == 6);
+        assertTrue(g.getFinTimeOfNode(5) == 1);
+        assertTrue(g.getFinTimeOfNode(6) == 2);
         assertTrue(g.getNodeWithFinTime(1) == 5);
         assertTrue(g.getNodeWithFinTime(2) == 6);
         assertTrue(g.getNodeWithFinTime(3) == 1);
@@ -570,12 +583,12 @@ public class GraphTest {
         assertTrue(g1.isExplored(4));
         assertTrue(g1.isExplored(5));
         assertTrue(g1.isExplored(6));
-        assertTrue(g1.getFinTimeOf(1) == 2);
-        assertTrue(g1.getFinTimeOf(2) == 3);
-        assertTrue(g1.getFinTimeOf(3) == 1);
-        assertTrue(g1.getFinTimeOf(4) == 4);
-        assertTrue(g1.getFinTimeOf(5) == 5);
-        assertTrue(g1.getFinTimeOf(6) == 6);
+        assertTrue(g1.getFinTimeOfNode(1) == 2);
+        assertTrue(g1.getFinTimeOfNode(2) == 3);
+        assertTrue(g1.getFinTimeOfNode(3) == 1);
+        assertTrue(g1.getFinTimeOfNode(4) == 4);
+        assertTrue(g1.getFinTimeOfNode(5) == 5);
+        assertTrue(g1.getFinTimeOfNode(6) == 6);
         assertTrue(g1.getNodeWithFinTime(1) == 3);
         assertTrue(g1.getNodeWithFinTime(2) == 1);
         assertTrue(g1.getNodeWithFinTime(3) == 2);
