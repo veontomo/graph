@@ -84,15 +84,18 @@ public class Graph {
      */
     private Integer _time = 0;
    
+    /**
+     * Number of nodes each leader possesses.
+     */
+    private int[] _answer;
+    private int _answerCurrentSize;
+    private int _answerMaxSize = 10;
     
     /** debug variables
      * 
      */
     private Integer _depth = 0;      // recursive call depth
     private Integer _markCalls = 0;  // counter of calls of mark
-    
-    
- 
     
     /**
      * Graph constructor. 
@@ -105,6 +108,9 @@ public class Graph {
         this._timeToNode = new HashMap();
         this._leaderSize = new HashMap();
         this._nodes = new HashMap();
+        this._answer = new int[this._answerMaxSize];
+        this._answerCurrentSize = 0;
+        
     }
     /**
      * _size getter.
@@ -503,12 +509,45 @@ public class Graph {
             while(!this.isExplored(n)){
 //                System.out.println("the node has not been explored yet, starting dfsLoop2...");
                 this.dfsLoop2(n, n);
-                System.out.println("cluster " + n + " size: " + this._leader.get(n).size() );
+//                System.out.println("cluster " + n + " size: " + this._leader.get(n).size() );
+                this.addToAnswer(this._leader.get(n).size());
+                
             }
             t--;
         }
-
     }
+    
+    
+    public void addToAnswer(int n){
+        boolean touched  = false;
+        if (this._answerCurrentSize < this._answerMaxSize){
+            this._answer[this._answerCurrentSize] = n;
+            this._answerCurrentSize++;
+            Arrays.sort(this._answer);
+            this._answer = this.reverseArray(this._answer);
+        } else {
+            int min = this._answer[this._answerMaxSize - 1];
+            if (min < n){
+                this._answer[this._answerMaxSize - 1] = n;
+                Arrays.sort(this._answer);
+                this._answer = this.reverseArray(this._answer);
+            }
+        }
+     }
+ 
+    public int[] reverseArray(int[] arr){
+        int maxSize = arr.length;
+        int[] output = new int[maxSize];
+        for (int i = 0; i < maxSize; i++) {
+            output[i] = arr[maxSize - i - 1];
+        }
+        return output;
+    }
+    
+    public String showAnswer(){
+        return Arrays.toString(this._answer);
+    }
+    
     /**
      * @param args the command line arguments
      */
@@ -517,7 +556,7 @@ public class Graph {
         System.out.println("loading graph");
         BufferedReader br = null;
         Graph g = new Graph();
-        String fileName = "SCC_med.txt";
+        String fileName = "SCC.txt";
         try {
             Integer counter = 0;
             Integer tail, head;
@@ -558,9 +597,10 @@ public class Graph {
         g.fragmentize();
         System.out.println("Fragmetizing is over");
 //        System.out.println(g.show());
-        System.out.println(g.getLeaderInfo());
+//        System.out.println(g.getLeaderInfo());
 //        System.out.println(g.show());
-
+        
+        System.out.println(g.showAnswer());
     
     }
     

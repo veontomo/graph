@@ -664,6 +664,38 @@ public class GraphTest {
 //        assertTrue(leader6.size() == 3);
     }
     
+    @Test
+    public void testReverseOddArray(){
+        System.out.println("Reversing odd-length array");
+        int[] arr = new int[5];
+        arr[0] = 1;
+        arr[1] = 2;
+        arr[2] = 3;
+        arr[3] = 4;
+        arr[4] = 5;
+        int[] arr2 = g2.reverseArray(arr);
+        assertEquals(arr2.length, 5);
+        assertEquals(arr2[0], 5);
+        assertEquals(arr2[1], 4);
+        assertEquals(arr2[2], 3);
+        assertEquals(arr2[3], 2);
+        assertEquals(arr2[4], 1);
+    }
+    
+    @Test
+    public void testReverseEvenArray() {
+        int[] arr = new int[4];
+        arr[0] = 1;
+        arr[1] = 2;
+        arr[2] = 3;
+        arr[3] = 4;
+        int[] arr2 = g2.reverseArray(arr);
+        assertEquals(arr2.length, 4);
+        assertEquals(arr2[0], 4);
+        assertEquals(arr2[1], 3);
+        assertEquals(arr2[2], 2);
+        assertEquals(arr2[3], 1);
+    }
     
     /**
      * Test of main method, of class Graph.
